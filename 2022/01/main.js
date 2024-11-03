@@ -29,7 +29,7 @@ function solve(filePath) {
     assert(solutionPart2_ == solutionPart2);
   }
 
-  console.log('-'.repeat(40))
+  console.log('-'.repeat(40));
 }
 
 
@@ -40,7 +40,7 @@ function solvePart1(filePath) {
 
 function solvePart2(filePath) {
   const kcal = loadKcal(filePath);
-  kcal.sort((a, b) => { return b - a })
+  kcal.sort((a, b) => { return b - a });
   return kcal.slice(0, 3).reduce((a, b) => a + b, 0);
 }
 
