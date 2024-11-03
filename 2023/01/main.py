@@ -17,16 +17,16 @@ def solve(file_path):
     print(file_path)
 
     if file_path in SOLUTIONS_PART1:
-        solution_part1 = SOLUTIONS_PART1[file_path]
         solution_part1_ = solve_part1(file_path)
-        assert solution_part1_ == solution_part1
         print(f"Part 1: {solution_part1_}")
+        solution_part1 = SOLUTIONS_PART1[file_path]
+        assert solution_part1_ == solution_part1
 
     if file_path in SOLUTIONS_PART2:
-        solution_part2 = SOLUTIONS_PART2[file_path]
         solution_part2_ = solve_part2(file_path)
-        assert solution_part2_ == solution_part2
         print(f"Part 2: {solution_part2_}")
+        solution_part2 = SOLUTIONS_PART2[file_path]
+        assert solution_part2_ == solution_part2
 
     print("-" * 40)
 
