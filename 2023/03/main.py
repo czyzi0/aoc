@@ -31,6 +31,26 @@ def solve(file_path):
 
 
 def solve_part1(file_path):
+
+    def get_numbers(engine):
+        pattern = re.compile(r"\d+")
+        for y, line in enumerate(engine):
+            for m in pattern.finditer(line):
+                yield int(m.group()), y, m.start(), m.end() - 1
+
+    def get_neighbors(engine, y, xs, xe):
+        xmax = len(engine[y]) - 1
+        ymax = len(engine) - 1
+
+        if xs > 0:
+            yield engine[y][xs - 1]
+        if xe < xmax:
+            yield engine[y][xe + 1]
+        if y > 0:
+            yield from engine[y - 1][max(xs - 1, 0):min(xe + 1, xmax) + 1]
+        if y < ymax:
+            yield from engine[y + 1][max(xs - 1, 0):min(xe + 1, xmax) + 1]
+
     result = 0
 
     engine = load_engine(file_path)
@@ -45,95 +65,38 @@ def solve_part1(file_path):
     return result
 
 
-def get_numbers(engine):
-    pattern = re.compile(r"\d+")
-    for y, line in enumerate(engine):
-        for m in pattern.finditer(line):
-            yield int(m.group()), y, m.start(), m.end() - 1
-
-
-def get_neighbors(engine, y, xs, xe):
-    xmax = len(engine[y]) - 1
-    ymax = len(engine) - 1
-
-    if xs > 0:
-        yield engine[y][xs - 1]
-    if xe < xmax:
-        yield engine[y][xe + 1]
-
-    for x_ in range(max(xs - 1, 0), min(xe + 1, xmax) + 1):
-        if y > 0:
-            yield engine[y - 1][x_]
-        if y < ymax:
-            yield engine[y + 1][x_]
-
-
 def solve_part2(file_path):
+
+    def get_stars(engine):
+        pattern = re.compile(r"\*")
+        for y, line in enumerate(engine):
+            for m in pattern.finditer(line):
+                assert m.start() == m.end() - 1
+                yield y, m.start()
+
+    def get_numbers(engine, y, x):
+        pattern = re.compile(r"\d+")
+        for m in pattern.finditer(engine[y]):
+            if m.start() == x + 1 or m.end() - 1 == x - 1:
+                yield int(m.group())
+        if y > 0:
+            for m in pattern.finditer(engine[y - 1]):
+                if x - 1 <= m.start() <= x + 1 or x - 1 <= m.end() - 1 <= x + 1:
+                    yield int(m.group())
+        if y < len(engine) - 1:
+            for m in pattern.finditer(engine[y + 1]):
+                if x - 1 <= m.start() <= x + 1 or x - 1 <= m.end() - 1 <= x + 1:
+                    yield int(m.group())
+
     result = 0
 
     engine = load_engine(file_path)
-    pattern = re.compile(r"\d+")
     for y, x in get_stars(engine):
-        neighbors = '.'.join(get_spans(engine, y, x))
-        numbers = [int(m.group()) for m in pattern.finditer(neighbors)]
+        numbers = list(get_numbers(engine, y, x))
         if len(numbers) == 2:
             result += numbers[0] * numbers[1]
 
     return result
-
-
-def get_stars(engine):
-    pattern = re.compile(r"\*")
-    for y, line in enumerate(engine):
-        for m in pattern.finditer(line):
-            assert m.start() == m.end() - 1
-            yield y, m.start()
-
-
-def get_spans(engine, y, x):
-    xmax = len(engine[y]) - 1
-    ymax = len(engine) - 1
-
-    if y > 0:
-        xs = x
-        while xs > 0:
-            xs -= 1
-            if not engine[y - 1][xs].isdigit():
-                break
-        xe = x
-        while xe < xmax:
-            xe += 1
-            if not engine[y - 1][xe].isdigit():
-                break
-        yield engine[y - 1][xs:xe + 1]
-
-    if y < ymax:
-        xs = x
-        while xs > 0:
-            xs -= 1
-            if not engine[y + 1][xs].isdigit():
-                break
-        xe = x
-        while xe < xmax:
-            xe += 1
-            if not engine[y + 1][xe].isdigit():
-                break
-        yield engine[y + 1][xs:xe + 1]
-
-    if x > 0:
-        xs = x - 1
-        while xs > 0:
-            if not engine[y][xs].isdigit():
-                break
-            xs -= 1
-        yield engine[y][xs:x]
-    if x < xmax:
-        xe = x + 1
-        while xe < xmax:
-            if not engine[y][xe].isdigit():
-                break
-            xe += 1
-        yield engine[y][x + 1:xe + 1]
 
 
 def load_engine(file_path):
