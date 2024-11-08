@@ -141,10 +141,6 @@ def load_engine(file_path):
         return [l.strip() for l in fp]
 
 
-
-
-
-
 if __name__ == "__main__":
     for file_path in sys.argv[1:]:
         solve(file_path)
