@@ -1,4 +1,5 @@
 import sys
+from pathlib import Path
 
 
 SOLUTIONS_PART1 = {
@@ -12,32 +13,30 @@ SOLUTIONS_PART2 = {
 
 
 def solve(file_path):
-    print(file_path)
+    print(f"### {file_path.name} ###")
 
-    if file_path in SOLUTIONS_PART1:
+    if file_path.name in SOLUTIONS_PART1:
         solution_part1_ = solve_part1(file_path)
         print(f"Part 1: {solution_part1_}")
-        solution_part1 = SOLUTIONS_PART1[file_path]
+        solution_part1 = SOLUTIONS_PART1[file_path.name]
         assert solution_part1_ == solution_part1
 
-    if file_path in SOLUTIONS_PART2:
+    if file_path.name in SOLUTIONS_PART2:
         solution_part2_ = solve_part2(file_path)
         print(f"Part 2: {solution_part2_}")
-        solution_part2 = SOLUTIONS_PART2[file_path]
+        solution_part2 = SOLUTIONS_PART2[file_path.name]
         assert solution_part2_ == solution_part2
-
-    print("-" * 40)
 
 
 def solve_part1(file_path):
     limits = {"red": 12, "green": 13, "blue": 14}
     result = 0
 
-    with open(file_path, "r") as fp:
+    with open(file_path, "r", encoding="utf-8") as fp:
         for game in fp:
             id_, rounds = parse_game(game)
-            for round in rounds:
-                if any(n > limits[c] for c, n in round.items()):
+            for round_ in rounds:
+                if any(n > limits[c] for c, n in round_.items()):
                     break
             else:
                 result += id_
@@ -48,7 +47,7 @@ def solve_part1(file_path):
 def solve_part2(file_path):
     result = 0
 
-    with open(file_path, "r") as fp:
+    with open(file_path, "r", encoding="utf-8") as fp:
         for game in fp:
             _, rounds = parse_game(game)
             result += (
@@ -66,17 +65,17 @@ def parse_game(game):
     id_ = int(id_.split()[-1])
 
     rounds = []
-    for round_ in rounds_.split(";"):
-        round = {}
-        for number, color in (x.split() for x in round_.split(",")):
+    for round__ in rounds_.split(";"):
+        round_ = {}
+        for number, color in (x.split() for x in round__.split(",")):
             number = int(number.strip())
             color = color.strip()
-            round[color] = number
-        rounds.append(round)
+            round_[color] = number
+        rounds.append(round_)
 
     return id_, rounds
 
 
 if __name__ == "__main__":
-    for file_path in sys.argv[1:]:
-        solve(file_path)
+    for file_path_ in sys.argv[1:]:
+        solve(Path(file_path_))

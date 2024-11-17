@@ -1,5 +1,6 @@
 import re
 import sys
+from pathlib import Path
 
 
 SOLUTIONS_PART1 = {
@@ -13,21 +14,19 @@ SOLUTIONS_PART2 = {
 
 
 def solve(file_path):
-    print(file_path)
+    print(f"### {file_path.name} ###")
 
-    if file_path in SOLUTIONS_PART1:
+    if file_path.name in SOLUTIONS_PART1:
         solution_part1_ = solve_part1(file_path)
         print(f"Part 1: {solution_part1_}")
-        solution_part1 = SOLUTIONS_PART1[file_path]
+        solution_part1 = SOLUTIONS_PART1[file_path.name]
         assert solution_part1_ == solution_part1
 
-    if file_path in SOLUTIONS_PART2:
+    if file_path.name in SOLUTIONS_PART2:
         solution_part2_ = solve_part2(file_path)
         print(f"Part 2: {solution_part2_}")
-        solution_part2 = SOLUTIONS_PART2[file_path]
+        solution_part2 = SOLUTIONS_PART2[file_path.name]
         assert solution_part2_ == solution_part2
-
-    print("-" * 40)
 
 
 def solve_part1(file_path):
@@ -47,9 +46,9 @@ def solve_part1(file_path):
         if xe < xmax:
             yield engine[y][xe + 1]
         if y > 0:
-            yield from engine[y - 1][max(xs - 1, 0):min(xe + 1, xmax) + 1]
+            yield from engine[y - 1][max(xs - 1, 0) : min(xe + 1, xmax) + 1]
         if y < ymax:
-            yield from engine[y + 1][max(xs - 1, 0):min(xe + 1, xmax) + 1]
+            yield from engine[y + 1][max(xs - 1, 0) : min(xe + 1, xmax) + 1]
 
     result = 0
 
@@ -100,10 +99,10 @@ def solve_part2(file_path):
 
 
 def load_engine(file_path):
-    with open(file_path, "r") as fp:
+    with open(file_path, "r", encoding="utf-8") as fp:
         return [l.strip() for l in fp]
 
 
 if __name__ == "__main__":
-    for file_path in sys.argv[1:]:
-        solve(file_path)
+    for file_path_ in sys.argv[1:]:
+        solve(Path(file_path_))
