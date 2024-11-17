@@ -1,5 +1,6 @@
 const assert = require('assert');
 const fs = require('fs');
+const path = require('path');
 
 
 const SOLUTIONS_PART1 = {
@@ -13,23 +14,22 @@ const SOLUTIONS_PART2 = {
 
 
 function solve(filePath) {
-  console.log(filePath)
+  const fileName = path.basename(filePath)
+  console.log(`### ${fileName} ###`)
 
-  if (filePath in SOLUTIONS_PART1) {
+  if (fileName in SOLUTIONS_PART1) {
     const solutionPart1_ = solvePart1(filePath);
     console.log(`Part 1: ${solutionPart1_}`);
-    const solutionPart1 = SOLUTIONS_PART1[filePath];
+    const solutionPart1 = SOLUTIONS_PART1[fileName];
     assert(solutionPart1_ == solutionPart1);
   }
 
-  if (filePath in SOLUTIONS_PART2) {
+  if (fileName in SOLUTIONS_PART2) {
     const solutionPart2_ = solvePart2(filePath);
     console.log(`Part 2: ${solutionPart2_}`);
-    const solutionPart2 = SOLUTIONS_PART2[filePath];
+    const solutionPart2 = SOLUTIONS_PART2[fileName];
     assert(solutionPart2_ == solutionPart2);
   }
-
-  console.log('-'.repeat(40));
 }
 
 
