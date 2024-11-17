@@ -39,9 +39,7 @@ function solvePart1(filePath) {
 
 
 function solvePart2(filePath) {
-  const kcal = loadKcal(filePath);
-  kcal.sort((a, b) => { return b - a });
-  return kcal.slice(0, 3).reduce((a, b) => a + b, 0);
+  return loadKcal(filePath).sort((a, b) => { return b - a }).slice(0, 3).reduce((a, b) => a + b, 0);
 }
 
 
