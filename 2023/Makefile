@@ -9,7 +9,7 @@ SAMPLES = $(DAY)/sample*.txt
 INPUTS = $(DAY)/input*.txt
 
 
-$(DAY): .venv/bin/activate $(DAY)/main.py $(INPUTS)
+$(DAY): .venv/bin/activate $(DAY)/main.py $(SAMPLES) $(INPUTS)
 	@source .venv/bin/activate && black $(DAY)/main.py 2> /dev/null
 	@source .venv/bin/activate && pylint \
 		--exit-zero \
