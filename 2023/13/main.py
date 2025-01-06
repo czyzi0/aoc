@@ -65,7 +65,7 @@ def load_images(file_path):
 
 
 def transpose(image):
-    return [''.join(c) for c in zip(*image)]
+    return ["".join(c) for c in zip(*image)]
 
 
 def convert_image(image):
