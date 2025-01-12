@@ -33,24 +33,18 @@ def solve_part1(file_path):
 
 
 def solve_part2(file_path):
-    max_cycles = 1_000_000_000
-
-    def locate_repeat(tiles):
-        tiles_str_list = []
-        for i in range(max_cycles):
-            tiles = move_cycle(tiles)
-            tiles_str = "".join("".join(r) for r in tiles)
-            try:
-                j = tiles_str_list.index(tiles_str)
-                return j, i - j
-            except ValueError:
-                tiles_str_list.append(tiles_str)
-        raise RuntimeError
-
     tiles = load_tiles(file_path)
-    start, length = locate_repeat(tiles)
-    for _ in range(start + (max_cycles - start) % length):
+    max_cycles = 1_000_000_000
+    history = []
+    for i in range(max_cycles):
         tiles = move_cycle(tiles)
+        tiles_str = "\n".join("".join(r) for r in tiles)
+        try:
+            j = history.index(tiles_str)
+            tiles = [list(r) for r in history[j + (max_cycles - j) % (i - j) - 1].split("\n")]
+            break
+        except ValueError:
+            history.append(tiles_str)
     return calculate_total_load(tiles)
 
 
