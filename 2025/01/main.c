@@ -4,8 +4,38 @@
 #include <string.h>
 
 
+void check_solution(int part, char *file_name, int solution) {
+    if (strcmp(file_name, "sample1.txt") == 0) {
+        switch (part) {
+        case 1:
+            assert(solution == 3);
+            break;
+        case 2:
+            assert(solution == 6);
+            break;
+        default:
+            assert(0);
+        }
+    } else if (strcmp(file_name, "input.txt") == 0) {
+        switch (part) {
+        case 1:
+            assert(solution == 1048);
+            break;
+        case 2:
+            assert(solution == 6498);
+            break;
+        default:
+            assert(0);
+        }
+    } else {
+        assert(0);
+    }
+}
+
+
 void solve(char *file_path) {
-    printf("### %s ###\n", strrchr(file_path, '/') + 1);
+    char *file_name = strrchr(file_path, '/') + 1;
+    printf("### %s ###\n", file_name);
 
     int solution_part1_ = 0;
     int solution_part2_ = 0;
@@ -46,7 +76,9 @@ void solve(char *file_path) {
     fclose(fp);
 
     printf("Part 1: %d\n", solution_part1_);
+    check_solution(1, file_name, solution_part1_);
     printf("Part 2: %d\n", solution_part2_);
+    check_solution(2, file_name, solution_part2_);
 }
 
 
