@@ -4,32 +4,26 @@
 #include <string.h>
 
 
+typedef struct {
+    char *file_name;
+    int part1;
+    int part2;
+} ExpectedSolution;
+
+
 void check_solution(int part, char *file_name, int solution) {
-    if (strcmp(file_name, "sample1.txt") == 0) {
-        switch (part) {
-        case 1:
-            assert(solution == 3);
-            break;
-        case 2:
-            assert(solution == 6);
-            break;
-        default:
-            assert(0);
+    ExpectedSolution solutions[2] = {
+        {"sample1.txt", 3, 6},
+        {"input.txt", 1048, 6498},
+    };
+    for (int i = 0; i < 2; ++i) {
+        if (strcmp(file_name, solutions[i].file_name) == 0) {
+            int expected = (part == 1) ? solutions[i].part1 : solutions[i].part2;
+            assert(solution == expected);
+            return;
         }
-    } else if (strcmp(file_name, "input.txt") == 0) {
-        switch (part) {
-        case 1:
-            assert(solution == 1048);
-            break;
-        case 2:
-            assert(solution == 6498);
-            break;
-        default:
-            assert(0);
-        }
-    } else {
-        assert(0);
     }
+    assert(0);
 }
 
 
