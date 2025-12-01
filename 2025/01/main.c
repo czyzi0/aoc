@@ -42,29 +42,14 @@ void solve(char *file_path) {
     int dial = 50;
     while (fgets(buff, sizeof(buff), fp) != NULL) {
         assert(buff[strlen(buff) - 1] == '\n');
+        assert(buff[0] == 'L' || buff[0] == 'R');
 
-        int rotation = atoi(buff + 1);
-        int dial_;
-        if (buff[0] == 'R') {
-            dial_ = dial + rotation;
-
-            solution_part2_ += dial_ / 100;
-        } else if (buff[0] == 'L') {
-            dial_ = dial - rotation;
-
-            if (dial_ <= 0) {  // Crossed to or via 0
-                if (dial != 0 ) solution_part2_ += 1;
-                solution_part2_ -= dial_ / 100;  // Adjust for consecutive crosses
-            }
-        } else {
-            assert(0);
-        }
-
-        dial = (dial_ % 100 + 100) % 100;
-
-        if (dial == 0) {
-            solution_part1_ += 1;
-        }
+        if (buff[0] == 'L' && dial != 0) dial = 100 - dial;  // Reflect
+        dial += atoi(buff + 1);                              // Always right
+        solution_part2_ += dial / 100;
+        dial %= 100;
+        if (buff[0] == 'L' && dial != 0) dial = 100 - dial;  // Reflect
+        if (dial == 0) solution_part1_ += 1;
     }
 
     fclose(fp);
