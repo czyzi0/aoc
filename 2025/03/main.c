@@ -13,8 +13,8 @@ typedef struct {
 
 void check_solution(int part, char *file_name, long long solution) {
     ExpectedSolution solutions[2] = {
-        {"sample1.txt", 357LL, 3121910778619LL},
-        {"input.txt", 17346LL, 172981362045136LL},
+        {"sample1.txt", 357, 3121910778619},
+        {"input.txt", 17346, 172981362045136},
     };
     for (int i = 0; i < 2; ++i) {
         if (strcmp(file_name, solutions[i].file_name) == 0) {
@@ -37,12 +37,12 @@ int find_max_digit(char digits[], int begin, int end) {
 }
 
 
-long long get_max_number(char digits[], int n, int n_digits) {
+long long get_max_number(char digits[], int len, int n_digits) {
     long long result = 0;
     int i = -1;
     while (n_digits > 0) {
         n_digits -= 1;
-        i = find_max_digit(digits, i + 1, n - n_digits);
+        i = find_max_digit(digits, i + 1, len - n_digits);
         result += pow(10, n_digits) * (digits[i] - '0');
     }
     return result;
@@ -61,12 +61,11 @@ void solve(char *file_path) {
 
     char digits[128];
     while (fgets(digits, sizeof(digits), fp) != NULL) {
-        int n = strlen(digits) - 1;
-        assert(digits[n] == '\n');
-        digits[n] = '\0';
+        int len = strlen(digits) - 1;
+        digits[len] = '\0';
 
-        solution_part1_ += get_max_number(digits, n, 2);
-        solution_part2_ += get_max_number(digits, n, 12);
+        solution_part1_ += get_max_number(digits, len, 2);
+        solution_part2_ += get_max_number(digits, len, 12);
     }
 
     fclose(fp);
