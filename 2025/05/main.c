@@ -4,9 +4,15 @@
 #include <string.h>
 
 
-#define N 200
-
 #define IN_RANGE(x, lo, hi) (((x) >= (lo)) && ((x) <= (hi)))
+
+
+typedef struct RangeNode {
+    long long lo;
+    long long hi;
+    struct RangeNode *prev;
+    struct RangeNode *next;
+} RangeNode;
 
 
 typedef struct {
@@ -14,12 +20,6 @@ typedef struct {
     long long part1;
     long long part2;
 } ExpectedSolution;
-
-
-typedef struct {
-    long long lo;
-    long long hi;
-} Range;
 
 
 void check_solution(int part, char *file_name, long long solution) {
@@ -49,51 +49,85 @@ void solve(char *file_path) {
     assert(fp);
 
     char buff[48];
+    RangeNode *head = NULL, *tail = NULL;
 
     // Load all ranges
-    Range ranges[N];
-    int n = 0;
     while (fgets(buff, sizeof(buff), fp) != NULL) {
-        assert(n < N);
         if (strcmp(buff, "\n") == 0) break;
+
         long long lo, hi;
         assert(sscanf(buff, "%lld-%lld", &lo, &hi) == 2);
-        ranges[n].lo = lo;
-        ranges[n].hi = hi;
-        n += 1;
+
+        RangeNode *node = malloc(sizeof(RangeNode));
+        assert(node);
+
+        node->lo = lo;
+        node->hi = hi;
+        node->prev = tail;
+        node->next = NULL;
+
+        if (tail == NULL) {
+            head = node;
+        } else {
+            tail->next = node;
+        }
+        tail = node;
     }
 
-    // Deduplicate ranges
-    for (int i = 0; i < n - 1; ++i) {
-        for (int j = i + 1; j < n; ++j) {
-            if (ranges[i].hi < ranges[j].lo || ranges[i].lo > ranges[j].hi) continue;
-            ranges[j].lo = (ranges[i].lo < ranges[j].lo) ? ranges[i].lo : ranges[j].lo;
-            ranges[j].hi = (ranges[i].hi > ranges[j].hi) ? ranges[i].hi : ranges[j].hi;
-            ranges[i].lo = ranges[i].hi = 0;
+    // Merge overlapping ranges
+    RangeNode *curr = head;
+    while (curr) {
+        RangeNode *runn = curr->next;
+        while (runn) {
+            if (curr->hi < runn->lo || curr->lo > runn->hi) {  // No overlap
+                runn = runn->next;
+                continue;
+            }
+
+            runn->lo = (runn->lo < curr->lo) ? runn->lo : curr-> lo;
+            runn->hi = (runn->hi > curr->hi) ? runn->hi : curr-> hi;
+
+            RangeNode *tmp = curr;
+            curr = curr->next;
+            if (tmp->prev) tmp->prev->next = tmp->next;
+            if (tmp->next) tmp->next->prev = tmp->prev;
+            if (tmp == head) head = tmp->next;
+            free(tmp);
             break;
         }
+        if (!runn) curr = curr->next;
     }
 
     // Count fresh products
     while (fgets(buff, sizeof(buff), fp) != NULL) {
         long long x;
         assert(sscanf(buff, "%lld", &x) == 1);
-        for (int i = 0; i < n; ++i) {
-            if (ranges[i].lo == 0 || ranges[i].hi == 0) continue;
-            if (IN_RANGE(x, ranges[i].lo, ranges[i].hi)) {
+        curr = head;
+        while (curr) {
+            if (IN_RANGE(x, curr->lo, curr->hi)) {
                 solution_part1_ += 1;
                 break;
             }
+            curr = curr->next;
         }
     }
+    fclose(fp);
 
     // Count all possible fresh products
-    for (int i = 0; i < n; ++i) {
-        if (ranges[i].lo == 0 || ranges[i].hi == 0) continue;
-        solution_part2_ += (ranges[i].hi - ranges[i].lo + 1);
+    curr = head;
+    while (curr) {
+        solution_part2_ += (curr->hi - curr->lo + 1);
+        curr = curr->next;
     }
 
-    fclose(fp);
+    // Clean up the list
+    curr = head;
+    while (curr) {
+        RangeNode *tmp = curr->next;
+        free(curr);
+        curr = tmp;
+    }
+    head = NULL; tail = NULL;
 
     printf("Part 1: %lld\n", solution_part1_);
     check_solution(1, file_name, solution_part1_);
