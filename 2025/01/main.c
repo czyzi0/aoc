@@ -41,7 +41,6 @@ void solve(char *file_path) {
 
     int dial = 50;
     while (fgets(buff, sizeof(buff), fp) != NULL) {
-        assert(buff[strlen(buff) - 1] == '\n');
         assert(buff[0] == 'L' || buff[0] == 'R');
 
         if (buff[0] == 'L' && dial != 0) dial = 100 - dial;  // Reflect
