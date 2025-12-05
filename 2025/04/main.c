@@ -75,6 +75,7 @@ void solve(char *file_path) {
 
     // Create and read grid
     char *grid = malloc(size * size * sizeof(char));
+    assert(grid);
     int i = 0;
     while((c = fgetc(fp)) != EOF) {
         assert(i <= size * size);
