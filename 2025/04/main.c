@@ -70,14 +70,14 @@ void solve(char *file_path) {
     // Find grid's size
     int size = 0;
     int c;
-    while((c = fgetc(fp)) != EOF && c != '\n') size += 1;
+    while ((c = fgetc(fp)) != EOF && c != '\n') size += 1;
     fseek(fp, 0, SEEK_SET);
 
     // Create and read grid
     char *grid = malloc(size * size * sizeof(char));
     assert(grid);
     int i = 0;
-    while((c = fgetc(fp)) != EOF) {
+    while ((c = fgetc(fp)) != EOF) {
         assert(i <= size * size);
         if (c == '\n') continue;
         grid[i++] = (char)c;
@@ -85,7 +85,7 @@ void solve(char *file_path) {
     fclose(fp);
 
     solution_part2_ = solution_part1_ = remove_rolls(grid, size);
-    while((i = remove_rolls(grid, size)) != 0) solution_part2_ += i;
+    while ((i = remove_rolls(grid, size)) != 0) solution_part2_ += i;
 
     free(grid);
 
