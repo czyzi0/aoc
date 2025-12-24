@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <inttypes.h>
+#include <math.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -30,7 +31,7 @@ void check_solution(size_t part, char *file_name, uint64_t solution) {
 
 #define N 256
 
-uint64_t count_digits(uint64_t n) {
+size_t count_digits(uint64_t n) {
     uint64_t result = 1;
     while (n >= 10) {
         n /= 10;
@@ -39,18 +40,10 @@ uint64_t count_digits(uint64_t n) {
     return result;
 }
 
-uint64_t pow10_(uint64_t exp) {
-    uint64_t result = 1;
-    while (exp--) {
-        result *= 10;
-    }
-    return result;
-}
-
-bool is_repeated(uint64_t n, uint64_t n_digits, size_t n_repeats) {
+bool is_repeated(uint64_t n, size_t n_digits, size_t n_repeats) {
     if (n_digits % n_repeats != 0) return false;
 
-    uint64_t aux = pow10_(n_digits / n_repeats);
+    uint64_t aux = (uint64_t)pow(10, (double)n_digits / n_repeats);
 
     uint64_t last = n % aux;
     for (size_t i = 1; i < n_repeats; ++i) {
@@ -67,7 +60,7 @@ bool is_invalid_part1(uint64_t n) {
 
 bool is_invalid_part2(uint64_t n) {
     uint64_t n_digits = count_digits(n);
-    for (uint64_t i = 2; i <= n_digits; ++i) {
+    for (size_t i = 2; i <= n_digits; ++i) {
         if (is_repeated(n, n_digits, i)) return true;
     }
     return false;

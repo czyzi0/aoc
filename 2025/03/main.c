@@ -1,35 +1,37 @@
 #include <assert.h>
+#include <inttypes.h>
 #include <math.h>
+#include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 
 
 typedef struct {
     char *file_name;
-    long long part1;
-    long long part2;
+    uint64_t part1;
+    uint64_t part2;
 } ExpectedSolution;
 
-
-void check_solution(int part, char *file_name, long long solution) {
+void check_solution(size_t part, char *file_name, uint64_t solution) {
     ExpectedSolution solutions[2] = {
         {"sample1.txt", 357, 3121910778619},
         {"input.txt", 17346, 172981362045136},
     };
-    for (int i = 0; i < 2; ++i) {
+    for (size_t i = 0; i < 2; ++i) {
         if (strcmp(file_name, solutions[i].file_name) == 0) {
-            long long expected = (part == 1) ? solutions[i].part1 : solutions[i].part2;
+            uint64_t expected = (part == 1) ? solutions[i].part1 : solutions[i].part2;
             assert(solution == expected);
             return;
         }
     }
-    assert(0);
+    assert(false);
 }
 
 
-int find_max_digit(char digits[], int begin, int end) {
-    int max_i = begin;
-    for (int i = begin; i < end; ++i) {
+size_t find_max_digit(char digits[], size_t begin, size_t end) {
+    size_t max_i = begin;
+    for (size_t i = begin; i < end; ++i) {
         if (digits[i] > digits[max_i]) max_i = i;
         if (digits[i] == '9') break;
     }
@@ -37,9 +39,9 @@ int find_max_digit(char digits[], int begin, int end) {
 }
 
 
-long long get_max_number(char digits[], int len, int n_digits) {
-    long long result = 0;
-    int i = -1;
+uint64_t get_max_number(char digits[], size_t len, size_t n_digits) {
+    uint64_t result = 0;
+    size_t i = -1;
     while (n_digits > 0) {
         n_digits -= 1;
         i = find_max_digit(digits, i + 1, len - n_digits);
@@ -53,15 +55,15 @@ void solve(char *file_path) {
     char *file_name = strrchr(file_path, '/') + 1;
     printf("### %s ###\n", file_name);
 
-    long long solution_part1_ = 0;
-    long long solution_part2_ = 0;
+    uint64_t solution_part1_ = 0;
+    uint64_t solution_part2_ = 0;
 
     FILE *fp = fopen(file_path, "r");
     assert(fp);
 
     char digits[128];
     while (fgets(digits, sizeof(digits), fp) != NULL) {
-        int len = strlen(digits) - 1;
+        size_t len = strlen(digits) - 1;
         digits[len] = '\0';
 
         solution_part1_ += get_max_number(digits, len, 2);
@@ -70,9 +72,9 @@ void solve(char *file_path) {
 
     fclose(fp);
 
-    printf("Part 1: %lld\n", solution_part1_);
+    printf("Part 1: %" PRIu64 "\n", solution_part1_);
     check_solution(1, file_name, solution_part1_);
-    printf("Part 2: %lld\n", solution_part2_);
+    printf("Part 2: %" PRIu64 "\n", solution_part2_);
     check_solution(2, file_name, solution_part2_);
 }
 
