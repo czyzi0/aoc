@@ -13,7 +13,6 @@ typedef struct {
     int32_t part2;
 } ExpectedSolution;
 
-
 void check_solution(size_t part, char *file_name, int32_t solution) {
     ExpectedSolution solutions[2] = {
         {"sample1.txt", 3, 6},
