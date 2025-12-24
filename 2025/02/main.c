@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <inttypes.h>
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
@@ -11,19 +12,19 @@ typedef struct {
     uint64_t part2;
 } ExpectedSolution;
 
-void check_solution(int part, char *file_name, uint64_t solution) {
+void check_solution(size_t part, char *file_name, uint64_t solution) {
     ExpectedSolution solutions[2] = {
-        {"sample1.txt", 1227775554, 0},
-        {"input.txt", 54234399924, 0},
+        {"sample1.txt", 1227775554, 4174379265},
+        {"input.txt", 54234399924, 70187097315},
     };
-    for (int i = 0; i < 2; ++i) {
+    for (size_t i = 0; i < 2; ++i) {
         if (strcmp(file_name, solutions[i].file_name) == 0) {
             uint64_t expected = (part == 1) ? solutions[i].part1 : solutions[i].part2;
             assert(solution == expected);
             return;
         }
     }
-    assert(0);
+    assert(false);
 }
 
 
@@ -46,22 +47,30 @@ uint64_t pow10_(uint64_t exp) {
     return result;
 }
 
-uint64_t sanitize_lo(uint64_t lo) {
-    uint64_t n_digits = count_digits(lo);
-    if (n_digits % 2 == 0) return lo;
-    return pow10_(n_digits);
+bool is_repeated(uint64_t n, uint64_t n_digits, size_t n_repeats) {
+    if (n_digits % n_repeats != 0) return false;
+
+    uint64_t aux = pow10_(n_digits / n_repeats);
+
+    uint64_t last = n % aux;
+    for (size_t i = 1; i < n_repeats; ++i) {
+        n /= aux;
+        if (n % aux != last) return false;
+    }
+    return true;
 }
 
-uint64_t sanitize_hi(uint64_t hi) {
-    uint64_t n_digits = count_digits(hi);
-    if (n_digits % 2 == 0) return hi;
-    return pow10_(n_digits - 1) - 1;
+bool is_invalid_part1(uint64_t n) {
+    return is_repeated(n, count_digits(n), 2);
 }
 
-uint64_t leading_half(uint64_t n) {
+
+bool is_invalid_part2(uint64_t n) {
     uint64_t n_digits = count_digits(n);
-    assert(n_digits % 2 == 0);
-    return n / pow10_(n_digits / 2);
+    for (uint64_t i = 2; i <= n_digits; ++i) {
+        if (is_repeated(n, n_digits, i)) return true;
+    }
+    return false;
 }
 
 void solve(char *file_path) {
@@ -69,7 +78,7 @@ void solve(char *file_path) {
     printf("### %s ###\n", file_name);
 
     uint64_t solution_part1_ = 0;
-    // int solution_part2_ = 0;
+    uint64_t solution_part2_ = 0;
 
     FILE *fp = fopen(file_path, "r");
     assert(fp);
@@ -89,11 +98,9 @@ void solve(char *file_path) {
         uint64_t lo, hi;
         assert(sscanf(buff, "%" SCNu64 "-%" SCNu64, &lo, &hi) == 2);
 
-        lo = sanitize_lo(lo);
-        hi = sanitize_hi(hi);
-        for (uint64_t j = leading_half(lo); j <= leading_half(hi); ++j) {
-            uint64_t candidate = pow10_(count_digits(j)) * j + j;
-            if (candidate >= lo && candidate <= hi) solution_part1_ += candidate;
+        for (uint64_t n = lo; n <= hi; ++n) {
+            if (is_invalid_part1(n)) solution_part1_ += n;
+            if (is_invalid_part2(n)) solution_part2_ += n;
         }
 
         i = 0;
@@ -103,8 +110,8 @@ void solve(char *file_path) {
 
     printf("Part 1: %" PRIu64 "\n", solution_part1_);
     check_solution(1, file_name, solution_part1_);
-    // printf("Part 2: %d\n", solution_part2_);
-    // check_solution(2, file_name, solution_part2_);
+    printf("Part 2: %" PRIu64 "\n", solution_part2_);
+    check_solution(2, file_name, solution_part2_);
 }
 
 
