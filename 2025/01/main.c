@@ -1,4 +1,7 @@
 #include <assert.h>
+#include <inttypes.h>
+#include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -6,45 +9,47 @@
 
 typedef struct {
     char *file_name;
-    int part1;
-    int part2;
+    int32_t part1;
+    int32_t part2;
 } ExpectedSolution;
 
 
-void check_solution(int part, char *file_name, int solution) {
+void check_solution(size_t part, char *file_name, int32_t solution) {
     ExpectedSolution solutions[2] = {
         {"sample1.txt", 3, 6},
         {"input.txt", 1048, 6498},
     };
-    for (int i = 0; i < 2; ++i) {
+    for (size_t i = 0; i < 2; ++i) {
         if (strcmp(file_name, solutions[i].file_name) == 0) {
-            int expected = (part == 1) ? solutions[i].part1 : solutions[i].part2;
+            int32_t expected = (part == 1) ? solutions[i].part1 : solutions[i].part2;
             assert(solution == expected);
             return;
         }
     }
-    assert(0);
+    assert(false);
 }
 
+
+#define N 8
 
 void solve(char *file_path) {
     char *file_name = strrchr(file_path, '/') + 1;
     printf("### %s ###\n", file_name);
 
-    int solution_part1_ = 0;
-    int solution_part2_ = 0;
+    int32_t solution_part1_ = 0;
+    int32_t solution_part2_ = 0;
 
     FILE *fp = fopen(file_path, "r");
     assert(fp);
 
-    char buff[8];
+    char buff[N];
 
-    int dial = 50;
+    int32_t dial = 50;
     while (fgets(buff, sizeof(buff), fp) != NULL) {
         assert(buff[0] == 'L' || buff[0] == 'R');
 
         if (buff[0] == 'L' && dial != 0) dial = 100 - dial;  // Reflect
-        dial += atoi(buff + 1);                              // Always right
+        dial += (int32_t)atoi(buff + 1);                     // Always right
         solution_part2_ += dial / 100;
         dial %= 100;
         if (buff[0] == 'L' && dial != 0) dial = 100 - dial;  // Reflect
@@ -53,9 +58,9 @@ void solve(char *file_path) {
 
     fclose(fp);
 
-    printf("Part 1: %d\n", solution_part1_);
+    printf("Part 1: %" PRId32 "\n", solution_part1_);
     check_solution(1, file_name, solution_part1_);
-    printf("Part 2: %d\n", solution_part2_);
+    printf("Part 2: %" PRId32 "\n", solution_part2_);
     check_solution(2, file_name, solution_part2_);
 }
 
