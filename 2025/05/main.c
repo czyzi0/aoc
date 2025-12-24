@@ -1,49 +1,49 @@
 #include <assert.h>
+#include <inttypes.h>
+#include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 
-#define IN_RANGE(x, lo, hi) (((x) >= (lo)) && ((x) <= (hi)))
-
-
-typedef struct RangeNode {
-    long long lo;
-    long long hi;
-    struct RangeNode *prev;
-    struct RangeNode *next;
-} RangeNode;
-
-
 typedef struct {
     char *file_name;
-    long long part1;
-    long long part2;
+    uint64_t part1;
+    uint64_t part2;
 } ExpectedSolution;
 
-
-void check_solution(int part, char *file_name, long long solution) {
+void check_solution(size_t part, char *file_name, uint64_t solution) {
     ExpectedSolution solutions[2] = {
         {"sample1.txt", 3, 14},
         {"input.txt", 701, 352340558684863},
     };
-    for (int i = 0; i < 2; ++i) {
+    for (size_t i = 0; i < 2; ++i) {
         if (strcmp(file_name, solutions[i].file_name) == 0) {
-            long long expected = (part == 1) ? solutions[i].part1 : solutions[i].part2;
+            uint64_t expected = (part == 1) ? solutions[i].part1 : solutions[i].part2;
             assert(solution == expected);
             return;
         }
     }
-    assert(0);
+    assert(false);
 }
 
+
+#define IN_RANGE(x, lo, hi) (((x) >= (lo)) && ((x) <= (hi)))
+
+typedef struct RangeNode {
+    uint64_t lo;
+    uint64_t hi;
+    struct RangeNode *prev;
+    struct RangeNode *next;
+} RangeNode;
 
 void solve(char *file_path) {
     char *file_name = strrchr(file_path, '/') + 1;
     printf("### %s ###\n", file_name);
 
-    long long solution_part1_ = 0;
-    long long solution_part2_ = 0;
+    uint64_t solution_part1_ = 0;
+    uint64_t solution_part2_ = 0;
 
     FILE *fp = fopen(file_path, "r");
     assert(fp);
@@ -55,8 +55,8 @@ void solve(char *file_path) {
     while (fgets(buff, sizeof(buff), fp) != NULL) {
         if (strcmp(buff, "\n") == 0) break;
 
-        long long lo, hi;
-        assert(sscanf(buff, "%lld-%lld", &lo, &hi) == 2);
+        uint64_t lo, hi;
+        assert(sscanf(buff, "%" SCNu64 "-%" SCNu64, &lo, &hi) == 2);
 
         RangeNode *node = malloc(sizeof(RangeNode));
         assert(node);
@@ -100,8 +100,8 @@ void solve(char *file_path) {
 
     // Count fresh products
     while (fgets(buff, sizeof(buff), fp) != NULL) {
-        long long x;
-        assert(sscanf(buff, "%lld", &x) == 1);
+        uint64_t x;
+        assert(sscanf(buff, "%" SCNu64, &x) == 1);
         curr = head;
         while (curr) {
             if (IN_RANGE(x, curr->lo, curr->hi)) {
@@ -129,9 +129,9 @@ void solve(char *file_path) {
     }
     head = NULL; tail = NULL;
 
-    printf("Part 1: %lld\n", solution_part1_);
+    printf("Part 1: %" PRIu64 "\n", solution_part1_);
     check_solution(1, file_name, solution_part1_);
-    printf("Part 2: %lld\n", solution_part2_);
+    printf("Part 2: %" PRIu64 "\n", solution_part2_);
     check_solution(2, file_name, solution_part2_);
 }
 

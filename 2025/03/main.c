@@ -38,10 +38,9 @@ size_t find_max_digit(char digits[], size_t begin, size_t end) {
     return max_i;
 }
 
-
 uint64_t get_max_number(char digits[], size_t len, size_t n_digits) {
     uint64_t result = 0;
-    size_t i = -1;
+    int32_t i = -1;
     while (n_digits > 0) {
         n_digits -= 1;
         i = find_max_digit(digits, i + 1, len - n_digits);
@@ -49,7 +48,6 @@ uint64_t get_max_number(char digits[], size_t len, size_t n_digits) {
     }
     return result;
 }
-
 
 void solve(char *file_path) {
     char *file_name = strrchr(file_path, '/') + 1;

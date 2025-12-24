@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <inttypes.h>
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
@@ -11,19 +12,19 @@ typedef struct {
     int64_t part2;
 } ExpectedSolution;
 
-void check_solution(int part, char *file_name, int64_t solution) {
+void check_solution(size_t part, char *file_name, int64_t solution) {
     ExpectedSolution solutions[2] = {
         {"sample1.txt", 50, 0},
         {"input.txt", 4755429952, 0},
     };
-    for (int i = 0; i < 2; ++i) {
+    for (size_t i = 0; i < 2; ++i) {
         if (strcmp(file_name, solutions[i].file_name) == 0) {
             int64_t expected = (part == 1) ? solutions[i].part1 : solutions[i].part2;
             assert(solution == expected);
             return;
         }
     }
-    assert(0);
+    assert(false);
 }
 
 

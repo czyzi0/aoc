@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <inttypes.h>
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -12,19 +13,19 @@ typedef struct {
     uint64_t part2;
 } ExpectedSolution;
 
-void check_solution(int part, char *file_name, uint64_t solution) {
+void check_solution(size_t part, char *file_name, uint64_t solution) {
     ExpectedSolution solutions[2] = {
         {"sample1.txt", 4277556, 3263827},
         {"input.txt", 5060053676136, 9695042567249},
     };
-    for (int i = 0; i < 2; ++i) {
+    for (size_t i = 0; i < 2; ++i) {
         if (strcmp(file_name, solutions[i].file_name) == 0) {
             uint64_t expected = (part == 1) ? solutions[i].part1 : solutions[i].part2;
             assert(solution == expected);
             return;
         }
     }
-    assert(0);
+    assert(false);
 }
 
 
@@ -87,10 +88,10 @@ void solve(char *file_path) {
         size_t end;
         for (; x < X; ++x) {
             // Skip non-empty columns
-            int col_full = 0;
+            bool col_full = false;
             for (size_t y = 0; y < Y; ++y) {
                 if (sheet[y][x] != ' ') {
-                    col_full = 1;
+                    col_full = true;
                     break;
                 }
             }
@@ -114,7 +115,7 @@ void solve(char *file_path) {
             } else if (ops[n] == '*') {
                 result *= num;
             } else {
-                assert(0);
+                assert(false);
             }
         }
         solution_part1_ += result;
@@ -133,7 +134,7 @@ void solve(char *file_path) {
             } else if (ops[n] == '*') {
                 result *= num;
             } else {
-                assert(0);
+                assert(false);
             }
         }
         solution_part2_ += result;
