@@ -9,18 +9,18 @@
 
 typedef struct {
     char *file_name;
-    int64_t part1;
-    int64_t part2;
+    uint64_t part1;
+    uint64_t part2;
 } ExpectedSolution;
 
-void check_solution(size_t part, char *file_name, int64_t solution) {
+void check_solution(size_t part, char *file_name, uint64_t solution) {
     ExpectedSolution solutions[2] = {
         {"sample1.txt", 40, 25272},
         {"input.txt", 47040, 4884971896},
     };
     for (size_t i = 0; i < 2; ++i) {
         if (strcmp(file_name, solutions[i].file_name) == 0) {
-            int64_t expected = (part == 1) ? solutions[i].part1 : solutions[i].part2;
+            uint64_t expected = (part == 1) ? solutions[i].part1 : solutions[i].part2;
             assert(solution == expected);
             return;
         }
@@ -93,8 +93,8 @@ void solve(char *file_path) {
     // Note that sample data has different number of created connections
     size_t n_connections = (strcmp(file_name, "sample1.txt") == 0) ? 10 : 1000;
 
-    int64_t solution_part1_ = 0;
-    int64_t solution_part2_ = 0;
+    uint64_t solution_part1_ = 0;
+    uint64_t solution_part2_ = 0;
 
     FILE *fp = fopen(file_path, "r");
     assert(fp);
@@ -110,7 +110,7 @@ void solve(char *file_path) {
         assert(n_boxes <= N);
     }
 
-    Distance *distances = malloc(N * N * sizeof(Distance));
+    Distance *distances = malloc(n_boxes * (n_boxes - 1) / 2 * sizeof(Distance));
     size_t n_distances = 0;
     for (size_t i = 0; i < n_boxes - 1; ++i) {
         for (size_t j = i + 1; j < n_boxes; ++j) {
@@ -186,7 +186,7 @@ void solve(char *file_path) {
         }
 
         if (n_not_connected == 0) {
-            solution_part2_ = (int64_t)box1->x * (int64_t)box2->x;
+            solution_part2_ = (uint64_t)box1->x * (uint64_t)box2->x;
         }
 
         if (solution_part1_ != 0 && solution_part2_ != 0) break;
