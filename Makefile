@@ -11,7 +11,7 @@ all: $(Y)/$(D)
 
 2025/$(D): $(Y)/$(D)/main.c $(SAMPLES) $(INPUTS)
 	@gcc -o $(Y)/$(D)/main $(Y)/$(D)/main.c -lm -Wall -Wextra -Werror
-	@./$(Y)/$(D)/main $(SAMPLES) $(INPUTS)
+	@./$(Y)/$(D)/main $(SAMPLES)
 	@rm $(Y)/$(D)/main
 
 2024/$(D): $(Y)/$(D)/main.lua $(SAMPLES) $(INPUTS)
