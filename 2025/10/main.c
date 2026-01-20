@@ -29,78 +29,187 @@ void check_solution(size_t part, char *file_name, uint32_t solution) {
 }
 
 
+#define MAX_SIZE 10
+
 typedef struct {
-    uint32_t *data;
-    size_t size, capacity;
-} Buttons;
+    uint32_t data[MAX_SIZE];
+    size_t size;
+} Vector;
 
-void buttons_init(Buttons *b) {
-    b->data = NULL;
-    b->size = 0;
-    b->capacity = 0;
+bool vector_eq(Vector *v1, Vector *v2) {
+    assert(v1->size == v2->size);
+    return memcmp(v1->data, v2->data, v1->size * sizeof(uint32_t)) == 0;
 }
 
-void buttons_add(Buttons *b, uint32_t button) {
-    if (b->size == b->capacity) {
-        size_t capacity = b->capacity ? b->capacity * 2 : 4;
-        uint32_t *data = realloc(b->data, capacity * sizeof(size_t));
-        assert(data);
-        b->capacity = capacity;
-        b->data = data;
-    }
-    b->data[b->size++] = button;
-}
-
-void buttons_free(Buttons *b) {
-    if (b->data != NULL) free(b->data);
-    b->data = NULL;
-    b->size = 0;
-    b->capacity = 0;
-}
-
-void set_bit(uint32_t *var, size_t idx, bool val) {
-    if (val) {
-        *var |= (uint32_t)1U << idx;
-    } else {
-        *var &= ~((uint32_t)1U << idx);
+void vector_xor(Vector *out, Vector *v1, Vector *v2) {
+    assert(v1->size == v2->size);
+    out->size = v1->size;
+    for (size_t i = 0; i < v1->size; ++i) {
+        out->data[i] = v1->data[i] ^ v2->data[i];
     }
 }
 
-bool get_bit(uint32_t var, size_t idx) {
-    return (var >> idx) & 1U;
-}
-
-void parse_target(uint32_t *target, size_t *size, const char *text) {
-    *target = 0;
-    *size = (size_t)(strlen(text) - 2);
-    for (size_t i = 0; i < *size; ++i) {
-        if (text[i + 1] == '#') {
-            set_bit(target, i, true);
-        } else if (text[i + 1] != '.') {
-            assert(false); 
-        }
+void vector_add(Vector *out, Vector *v1, Vector *v2) {
+    assert(v1->size == v2->size);
+    out->size = v1->size;
+    for (size_t i = 0; i < v1->size; ++i) {
+        out->data[i] = v1->data[i] + v2->data[i];
     }
 }
 
-void parse_button(uint32_t *button, const char *text) {
-    *button = 0;
-    const char *ptr = text + 1;
-    char *end;
-    while (*ptr != ')') {
-        set_bit(button, (size_t)strtol(ptr, &end, 10), true);
-        if (*end == ',') end++;
-        ptr = end;
-    }
-}
-
-// void print_bits(uint32_t data, size_t num) {
-//     for (size_t i = 0; i < num; ++i) {
-//         printf("%d", get_bit(data, i));
+// void vector_print(Vector *v) {
+//     for (size_t i = 0; i < v->size; ++i) {
+//         printf("%" PRIu32 " ", v->data[i]);
 //     }
 //     printf("\n");
 // }
 
-#define N 256
+Vector parse_target_part1(char *text) {
+    size_t size = (size_t)(strlen(text) - 2);
+    assert(size <= MAX_SIZE);
+
+    Vector target = { .size = size };
+    for (size_t i = 0; i < target.size; ++i) {
+        switch (text[i + 1]) {
+        case '#':
+            target.data[i] = 1U;
+            break;
+        case '.':
+            target.data[i] = 0U;
+            break;
+        default:
+            assert(false);
+        }
+    }
+    return target;
+}
+
+Vector parse_button(char *text, size_t size) {
+    Vector button = { .size = size };
+    char *ptr = text + 1;
+    char *end;
+    while (*ptr != ')') {
+        button.data[(size_t)strtol(ptr, &end, 10)] = 1U;
+        if (*end == ',') end++;
+        ptr = end;
+    }
+    return button;
+}
+
+Vector parse_target_part2(char *text, size_t size) {
+    Vector target = { .size = size };
+    size_t i = 0;
+    char *ptr = text + 1;
+    char *end;
+    while (*ptr != '}') {
+        target.data[i++] = (uint32_t)strtol(ptr, &end, 10);
+        if (*end == ',') end++;
+        ptr = end;
+    }
+    return target;
+}
+
+
+#define MAX_QUEUE 2048
+
+typedef struct {
+    Vector *data;
+    size_t head, tail;
+    size_t count, capacity;
+} Queue;
+
+void queue_init(Queue *q, size_t capacity) {
+    q->data = malloc(capacity * sizeof(Vector));
+    assert(q->data != NULL);
+
+    q->head = q->tail = 0;
+    q->count = 0;
+    q->capacity = capacity;
+}
+
+void queue_free(Queue *q) {
+    if (q->data != NULL) free(q->data);
+    q->data = NULL;
+
+    q->head = q->tail = 0;
+    q->count = 0;
+    q->capacity = 0;
+}
+
+bool queue_empty(Queue *q) {
+    return q->count == 0;
+}
+
+bool queue_full(Queue *q) {
+    return q->count == q->capacity;
+}
+
+void queue_push(Queue *q, Vector *v) {
+    assert(!queue_full(q));
+
+    q->data[q->tail] = *v;
+    q->tail = (q->tail + 1) % q->capacity;
+    q->count++;
+}
+
+Vector queue_pop(Queue *q) {
+    assert(!queue_empty(q));
+
+    Vector v = q->data[q->head];
+    q->head = (q->head + 1) % q->capacity;
+    q->count--;
+    return v;
+}
+
+size_t bfs(Vector *target, Vector buttons[], size_t n_buttons) {
+    Queue q;
+    queue_init(&q, MAX_QUEUE);
+
+    Vector visited[MAX_QUEUE];
+    size_t n_visited = 0;
+
+    Vector start = {0};
+    start.size = target->size;
+
+    queue_push(&q, &start);
+    visited[n_visited++] = start;
+
+    for (size_t depth = 0; !queue_empty(&q); ++depth) {
+        size_t depth_count = q.count;
+        for (size_t k = 0; k < depth_count; ++k) {
+            Vector current = queue_pop(&q);
+
+            if (vector_eq(&current, target)) {
+                queue_free(&q);
+                return depth;
+            }
+
+            for (size_t i = 0; i < n_buttons; ++i) {
+                Vector next;
+                vector_xor(&next, &current, &buttons[i]);
+
+                bool seen = false;
+                for (size_t j = 0; j < n_visited; ++j) {
+                    if (vector_eq(&visited[j], &next)) {
+                        seen = true;
+                        break;
+                    }
+                }
+
+                if (!seen) {
+                    visited[n_visited++] = next;
+                    assert(n_visited < MAX_QUEUE);
+                    queue_push(&q, &next);
+                }
+            }
+        }
+    }
+
+    assert(false);
+}
+
+#define MAX_BUFF 256
+#define MAX_BUTTONS 24
 
 void solve(char *file_path) {
     char *file_name = strrchr(file_path, '/') + 1;
@@ -112,56 +221,36 @@ void solve(char *file_path) {
     FILE *fp = fopen(file_path, "r");
     assert(fp);
 
-    char buff[N];
+    char buff[MAX_BUFF];
 
-    uint32_t target;
-    size_t size;
-
-    uint32_t button;
-    Buttons buttons;
-    buttons_init(&buttons);
+    Vector target_part1;
+    // Vector target_part2;
+    Vector buttons[MAX_BUTTONS];
+    size_t n_buttons;
 
     while (fgets(buff, sizeof(buff), fp) != NULL) {
         assert(buff[strlen(buff) - 1] == '\n');
 
-        buttons.size = 0;
+        n_buttons = 0;
 
         char *tok = strtok(buff, " ");
         while (tok) {
             if (tok[0] == '[') {
-                parse_target(&target, &size, tok);
+                target_part1 = parse_target_part1(tok);
             } else if (tok[0] == '(') {
-                parse_button(&button, tok);
-                buttons_add(&buttons, button);
+                buttons[n_buttons++] = parse_button(tok, target_part1.size);
+            // } else if (tok[0] == '{') {
+            //     target_part2 = parse_target_part2(tok, target_part1.size);
+            // } else {
+            //     assert(false);
             }
             tok = strtok(NULL, " ");
         }
 
-        uint32_t state;
-        bool found = false;
+        solution_part1_ += bfs(&target_part1, buttons, n_buttons);
 
-        for (uint32_t k = 1; !found && k <= buttons.size; ++k) {
-            uint32_t mask = (1 << k) - 1;
-            uint32_t limit = (1 << buttons.size);
-            while (!found && mask < limit) {
-                state = 0;
-                for (size_t i = 0; i < buttons.size; ++i) {
-                    if (get_bit(mask, i)) state ^= buttons.data[i];
-                }
-                if (state == target) {
-                    found = true;
-                    solution_part1_ += k;
-                }
-
-                // Gosper's hack
-                uint32_t c = mask & -mask;
-                uint32_t r = mask + c;
-                mask = (((r ^ mask) >> 2) / c) | r;
-            }
-        }
     }
 
-    buttons_free(&buttons);
     fclose(fp);
 
     printf("Part 1: %" PRIu32 "\n", solution_part1_);
