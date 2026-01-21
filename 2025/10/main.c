@@ -129,38 +129,38 @@ typedef struct HashSetEntry {
 } HashSetEntry;
 
 typedef struct {
-    HashSetEntry **buckets;
+    HashSetEntry **data;
     size_t capacity;
 } HashSet;
 
 void hashset_init(HashSet *s, size_t capacity) {
-    s->buckets = malloc(capacity * sizeof(HashSetEntry*));
-    assert(s->buckets != NULL);
+    s->data = malloc(capacity * sizeof(HashSetEntry*));
+    assert(s->data != NULL);
     s->capacity = capacity;
     for (size_t i = 0; i < capacity; ++i) {
-        s->buckets[i] = NULL;
+        s->data[i] = NULL;
     }
 }
 
 void hashset_free(HashSet *s) {
-    if (s->buckets != NULL) {
+    if (s->data != NULL) {
         for (size_t i = 0; i < s->capacity; ++i) {
-            HashSetEntry *entry = s->buckets[i];
+            HashSetEntry *entry = s->data[i];
             while (entry != NULL) {
                 HashSetEntry *next = entry->next;
                 free(entry);
                 entry = next;
             }
         }
-        free(s->buckets);
-        s->buckets = NULL;
+        free(s->data);
+        s->data = NULL;
     }
     s->capacity = 0;
 }
 
 bool hashset_contains(HashSet *s, Vector *v) {
     uint32_t index = vector_hash(v, (uint32_t)s->capacity);
-    HashSetEntry *entry = s->buckets[index];
+    HashSetEntry *entry = s->data[index];
     while (entry != NULL) {
         if (vector_eq(&entry->key, v)) {
             return true;
@@ -177,8 +177,8 @@ void hashset_insert(HashSet *s, Vector *v) {
     HashSetEntry *entry = malloc(sizeof(HashSetEntry));
     assert(entry != NULL);
     entry->key = *v;
-    entry->next = s->buckets[index];
-    s->buckets[index] = entry;
+    entry->next = s->data[index];
+    s->data[index] = entry;
 }
 
 
@@ -230,7 +230,7 @@ Vector parse_target_part2(char *text, size_t size) {
 #define MAX_QUEUE_SIZE 1024
 #define MAX_HASHSET_SIZE 2048
 
-size_t bfs(Vector *target, Vector buttons[], size_t n_buttons) {
+size_t calculate_min_presses_with_bfs(Vector *target, Vector buttons[], size_t n_buttons) {
     Queue q;
     queue_init(&q, MAX_QUEUE_SIZE);
 
@@ -308,7 +308,7 @@ void solve(char *file_path) {
             tok = strtok(NULL, " ");
         }
 
-        solution_part1_ += bfs(&target_part1, buttons, n_buttons);
+        solution_part1_ += calculate_min_presses_with_bfs(&target_part1, buttons, n_buttons);
 
     }
 
