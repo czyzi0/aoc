@@ -29,10 +29,10 @@ void check_solution(size_t part, char *file_name, uint32_t solution) {
 }
 
 
-#define MAX_SIZE 10
+#define MAX_VECTOR_SIZE 10
 
 typedef struct {
-    uint32_t data[MAX_SIZE];
+    uint32_t data[MAX_VECTOR_SIZE];
     size_t size;
 } Vector;
 
@@ -57,6 +57,14 @@ void vector_add(Vector *out, Vector *v1, Vector *v2) {
     }
 }
 
+uint32_t vector_hash(Vector *v, uint32_t mod) {
+    uint32_t hash = 5381;
+    for (size_t i = 0; i < v->size; ++i) {
+        hash = ((hash << 5) + hash) + v->data[i];
+    }
+    return hash % mod;
+}
+
 // void vector_print(Vector *v) {
 //     for (size_t i = 0; i < v->size; ++i) {
 //         printf("%" PRIu32 " ", v->data[i]);
@@ -64,53 +72,6 @@ void vector_add(Vector *out, Vector *v1, Vector *v2) {
 //     printf("\n");
 // }
 
-Vector parse_target_part1(char *text) {
-    size_t size = (size_t)(strlen(text) - 2);
-    assert(size <= MAX_SIZE);
-
-    Vector target = { .size = size };
-    for (size_t i = 0; i < target.size; ++i) {
-        switch (text[i + 1]) {
-        case '#':
-            target.data[i] = 1U;
-            break;
-        case '.':
-            target.data[i] = 0U;
-            break;
-        default:
-            assert(false);
-        }
-    }
-    return target;
-}
-
-Vector parse_button(char *text, size_t size) {
-    Vector button = { .size = size };
-    char *ptr = text + 1;
-    char *end;
-    while (*ptr != ')') {
-        button.data[(size_t)strtol(ptr, &end, 10)] = 1U;
-        if (*end == ',') end++;
-        ptr = end;
-    }
-    return button;
-}
-
-Vector parse_target_part2(char *text, size_t size) {
-    Vector target = { .size = size };
-    size_t i = 0;
-    char *ptr = text + 1;
-    char *end;
-    while (*ptr != '}') {
-        target.data[i++] = (uint32_t)strtol(ptr, &end, 10);
-        if (*end == ',') end++;
-        ptr = end;
-    }
-    return target;
-}
-
-
-#define MAX_QUEUE 2048
 
 typedef struct {
     Vector *data;
@@ -161,18 +122,126 @@ Vector queue_pop(Queue *q) {
     return v;
 }
 
+
+typedef struct HashSetEntry {
+    Vector key;
+    struct HashSetEntry *next;
+} HashSetEntry;
+
+typedef struct {
+    HashSetEntry **buckets;
+    size_t capacity;
+} HashSet;
+
+void hashset_init(HashSet *s, size_t capacity) {
+    s->buckets = malloc(capacity * sizeof(HashSetEntry*));
+    assert(s->buckets != NULL);
+    s->capacity = capacity;
+    for (size_t i = 0; i < capacity; ++i) {
+        s->buckets[i] = NULL;
+    }
+}
+
+void hashset_free(HashSet *s) {
+    if (s->buckets != NULL) {
+        for (size_t i = 0; i < s->capacity; ++i) {
+            HashSetEntry *entry = s->buckets[i];
+            while (entry != NULL) {
+                HashSetEntry *next = entry->next;
+                free(entry);
+                entry = next;
+            }
+        }
+        free(s->buckets);
+        s->buckets = NULL;
+    }
+    s->capacity = 0;
+}
+
+bool hashset_contains(HashSet *s, Vector *v) {
+    uint32_t index = vector_hash(v, (uint32_t)s->capacity);
+    HashSetEntry *entry = s->buckets[index];
+    while (entry != NULL) {
+        if (vector_eq(&entry->key, v)) {
+            return true;
+        }
+        entry = entry->next;
+    }
+    return false;
+}
+
+void hashset_insert(HashSet *s, Vector *v) {
+    assert(!hashset_contains(s, v));
+
+    uint32_t index = vector_hash(v, (uint32_t)s->capacity);
+    HashSetEntry *entry = malloc(sizeof(HashSetEntry));
+    assert(entry != NULL);
+    entry->key = *v;
+    entry->next = s->buckets[index];
+    s->buckets[index] = entry;
+}
+
+
+Vector parse_target_part1(char *text) {
+    size_t size = (size_t)(strlen(text) - 2);
+    assert(size <= MAX_VECTOR_SIZE);
+
+    Vector target = { .size = size };
+    for (size_t i = 0; i < target.size; ++i) {
+        switch (text[i + 1]) {
+        case '#':
+            target.data[i] = 1U;
+            break;
+        case '.':
+            target.data[i] = 0U;
+            break;
+        default:
+            assert(false);
+        }
+    }
+    return target;
+}
+
+Vector parse_button(char *text, size_t size) {
+    Vector button = { .size = size };
+    char *ptr = text + 1;
+    char *end;
+    while (*ptr != ')') {
+        button.data[(size_t)strtol(ptr, &end, 10)] = 1U;
+        if (*end == ',') end++;
+        ptr = end;
+    }
+    return button;
+}
+
+Vector parse_target_part2(char *text, size_t size) {
+    Vector target = { .size = size };
+    size_t i = 0;
+    char *ptr = text + 1;
+    char *end;
+    while (*ptr != '}') {
+        target.data[i++] = (uint32_t)strtol(ptr, &end, 10);
+        if (*end == ',') end++;
+        ptr = end;
+    }
+    return target;
+}
+
+#define MAX_QUEUE_SIZE 1024
+#define MAX_HASHSET_SIZE 2048
+
 size_t bfs(Vector *target, Vector buttons[], size_t n_buttons) {
     Queue q;
-    queue_init(&q, MAX_QUEUE);
+    queue_init(&q, MAX_QUEUE_SIZE);
 
-    Vector visited[MAX_QUEUE];
-    size_t n_visited = 0;
+    HashSet visited;
+    hashset_init(&visited, MAX_HASHSET_SIZE);
 
     Vector start = {0};
     start.size = target->size;
 
     queue_push(&q, &start);
-    visited[n_visited++] = start;
+    hashset_insert(&visited, &start);
 
     for (size_t depth = 0; !queue_empty(&q); ++depth) {
         size_t depth_count = q.count;
@@ -181,6 +250,7 @@ size_t bfs(Vector *target, Vector buttons[], size_t n_buttons) {
 
             if (vector_eq(&current, target)) {
                 queue_free(&q);
+                hashset_free(&visited);
                 return depth;
             }
 
@@ -188,17 +258,8 @@ size_t bfs(Vector *target, Vector buttons[], size_t n_buttons) {
                 Vector next;
                 vector_xor(&next, &current, &buttons[i]);
 
-                bool seen = false;
-                for (size_t j = 0; j < n_visited; ++j) {
-                    if (vector_eq(&visited[j], &next)) {
-                        seen = true;
-                        break;
-                    }
-                }
-
-                if (!seen) {
-                    visited[n_visited++] = next;
-                    assert(n_visited < MAX_QUEUE);
+                if (!hashset_contains(&visited, &next)) {
+                    hashset_insert(&visited, &next);
                     queue_push(&q, &next);
                 }
             }
