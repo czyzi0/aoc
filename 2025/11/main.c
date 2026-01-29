@@ -29,38 +29,66 @@ void check_solution(size_t part, char *file_name, uint32_t solution) {
 }
 
 
-typedef struct Edge {
+typedef struct EdgeList {
     size_t to;
-    struct Edge *next;
-} Edge;
+    struct EdgeList *next;
+} EdgeList;
 
 typedef struct {
-    char name[4];
-    Edge *out;
+    char id[4];
+    EdgeList *out;
 } Node;
 
 #define MAX_NODES 575
+#define MAX_IDS (26*26*26)
 
 typedef struct {
     Node nodes[MAX_NODES];
     size_t count;
+    size_t ids[MAX_IDS];
 } Graph;
 
-size_t add_node(Graph *g, char *name) {
-    // TODO: Check if node already exists, if so return its index
+void graph_init(Graph *g) {
+    g->count = 0;
+    for (size_t i = 0; i < MAX_IDS; ++i) {
+        g->ids[i] = MAX_NODES;
+    }
+}
 
-    size_t idx = g->count++;
-    strcpy(g->nodes[idx].name, name);
+size_t graph_encode_id(const char* id) {
+    return (
+        (id[0] - 'a') * 26 * 26 +
+        (id[1] - 'a') * 26 +
+        (id[2] - 'a')
+    );
+}
+
+size_t graph_add_or_get_node(Graph *g, const char *id) {
+    size_t ide = graph_encode_id(id);
+
+    size_t idx = g->ids[ide];
+    if (idx != MAX_NODES) {
+        return idx;
+    }
+
+    idx = g->count++;
+    strcpy(g->nodes[idx].id, id);
     g->nodes[idx].out = NULL;
+    g->ids[ide] = idx;
     return idx;
 }
 
-void add_edge(Graph *g, size_t from, size_t to) {
-    Edge *e = malloc(sizeof(Edge));
+void graph_add_edge(Graph *g, size_t from, size_t to) {
+    // NOTE: This can duplicate edges
+    EdgeList *e = malloc(sizeof(EdgeList));
     e->to = to;
     e->next = g->nodes[from].out;
     g->nodes[from].out = e;
 }
+
+// void graph_free(Graph *g) {
+//     // TODO: Write this
+// }
 
 #define BUFF_SIZE 128
 
@@ -75,31 +103,40 @@ void solve(char *file_path) {
     assert(fp);
 
     char buff[BUFF_SIZE];
+    const char *delim = ": \n";
 
-    Graph graph = {0};
+    Graph graph;
+    graph_init(&graph);
 
     while (fgets(buff, sizeof(buff), fp) != NULL) {
         assert(buff[strlen(buff) - 1] == '\n');
 
-        size_t from;
-
-        char *tok = strtok(buff, " ");
+        char *tok = strtok(buff, delim);
+        size_t from = graph_add_or_get_node(&graph, tok);
+        tok = strtok(NULL, delim);
         while (tok) {
-            if (tok[3] == ':') {
-                tok[3] = '\0';
-                from = add_node(&graph, tok);
-            } else {
-                size_t to = add_node(&graph, tok);
-                printf("VALEUE: %s\n", tok);
-            }
-            tok = strtok(NULL, " ");
+            size_t to = graph_add_or_get_node(&graph, tok);
+            graph_add_edge(&graph, from, to);
+            tok = strtok(NULL, delim);
         }
-        printf("==========\n");
 
-        graph.count++;
     }
 
+    printf("Number of nodes: %lu\n", graph.count);
+    for (size_t i = 0; i < graph.count; ++i) {
+        printf("KEY: %s\n", graph.nodes[i].id);
+        EdgeList *e = graph.nodes[i].out;
+        while (e != NULL) {
+            printf("%s\n", graph.nodes[e->to].id);
+            e = e->next;
+        }
+        printf("========\n");
+    }
+
+    // TODO: Use DFS to find all possible paths from you to out
+
     fclose(fp);
+    // graph_free(&graph);
 
     printf("Part 1: %" PRIu32 "\n", solution_part1_);
     check_solution(1, file_name, solution_part1_);
