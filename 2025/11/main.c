@@ -14,11 +14,12 @@ typedef struct {
 } ExpectedSolution;
 
 void check_solution(size_t part, char *file_name, uint32_t solution) {
-    ExpectedSolution solutions[2] = {
+    ExpectedSolution solutions[3] = {
         {"sample1.txt", 5, 0},
-        {"input.txt", 0, 0},
+        {"sample2.txt", 0, 2},
+        {"input.txt", 791, 0},
     };
-    for (size_t i = 0; i < 2; ++i) {
+    for (size_t i = 0; i < 3; ++i) {
         if (strcmp(file_name, solutions[i].file_name) == 0) {
             uint32_t expected = (part == 1) ? solutions[i].part1 : solutions[i].part2;
             assert(solution == expected);
@@ -39,7 +40,7 @@ typedef struct {
     EdgeList *out;
 } Node;
 
-#define MAX_NODES 575
+#define MAX_NODES 576
 #define MAX_IDS (26*26*26)
 
 typedef struct {
@@ -63,23 +64,29 @@ size_t graph_encode_id(const char* id) {
     );
 }
 
-size_t graph_add_or_get_node(Graph *g, const char *id) {
-    size_t ide = graph_encode_id(id);
+size_t graph_get_node(Graph *g, const char *id) {
+    return g->ids[graph_encode_id(id)];
+}
 
-    size_t idx = g->ids[ide];
-    if (idx != MAX_NODES) {
-        return idx;
-    }
-
-    idx = g->count++;
+size_t graph_add_node(Graph *g, const char *id) {
+    // NOTE: This may duplicate node
+    size_t idx = g->count++;
     strcpy(g->nodes[idx].id, id);
     g->nodes[idx].out = NULL;
-    g->ids[ide] = idx;
+    g->ids[graph_encode_id(id)] = idx;
+    return idx;
+}
+
+size_t graph_get_or_add_node(Graph *g, const char *id) {
+    size_t idx = graph_get_node(g, id);
+    if (idx == MAX_NODES) {
+        idx = graph_add_node(g, id);
+    }
     return idx;
 }
 
 void graph_add_edge(Graph *g, size_t from, size_t to) {
-    // NOTE: This can duplicate edges
+    // NOTE: This may duplicate edge
     EdgeList *e = malloc(sizeof(EdgeList));
     e->to = to;
     e->next = g->nodes[from].out;
@@ -90,14 +97,36 @@ void graph_add_edge(Graph *g, size_t from, size_t to) {
 //     // TODO: Write this
 // }
 
+void _solve_part1_with_dfs(Graph *g, Node* node, uint32_t *num_paths) {
+    if (strcmp(node->id, "out") == 0) {
+        *num_paths += 1;
+        return;
+    }
+
+    EdgeList *e = node->out;
+    while (e != NULL) {
+        _solve_part1_with_dfs(g, &g->nodes[e->to], num_paths);
+        e = e->next;
+    }
+}
+
+uint32_t solve_part1_with_dfs(Graph *g) {
+    size_t start_idx = g->ids[graph_encode_id("you")];
+    if (start_idx == MAX_NODES) return 0;
+
+    uint32_t num_paths = 0;
+    _solve_part1_with_dfs(g, &g->nodes[start_idx], &num_paths);
+    return num_paths;
+}
+
 #define BUFF_SIZE 128
 
 void solve(char *file_path) {
     char *file_name = strrchr(file_path, '/') + 1;
     printf("### %s ###\n", file_name);
 
-    int32_t solution_part1_ = 0;
-    // int32_t solution_part2_ = 0;
+    uint32_t solution_part1_ = 0;
+    // uint32_t solution_part2_ = 0;
 
     FILE *fp = fopen(file_path, "r");
     assert(fp);
@@ -112,35 +141,23 @@ void solve(char *file_path) {
         assert(buff[strlen(buff) - 1] == '\n');
 
         char *tok = strtok(buff, delim);
-        size_t from = graph_add_or_get_node(&graph, tok);
+        size_t from = graph_get_or_add_node(&graph, tok);
         tok = strtok(NULL, delim);
         while (tok) {
-            size_t to = graph_add_or_get_node(&graph, tok);
+            size_t to = graph_get_or_add_node(&graph, tok);
             graph_add_edge(&graph, from, to);
             tok = strtok(NULL, delim);
         }
-
     }
 
-    printf("Number of nodes: %lu\n", graph.count);
-    for (size_t i = 0; i < graph.count; ++i) {
-        printf("KEY: %s\n", graph.nodes[i].id);
-        EdgeList *e = graph.nodes[i].out;
-        while (e != NULL) {
-            printf("%s\n", graph.nodes[e->to].id);
-            e = e->next;
-        }
-        printf("========\n");
-    }
-
-    // TODO: Use DFS to find all possible paths from you to out
+    solution_part1_ = solve_part1_with_dfs(&graph);
 
     fclose(fp);
     // graph_free(&graph);
 
     printf("Part 1: %" PRIu32 "\n", solution_part1_);
     check_solution(1, file_name, solution_part1_);
-    // printf("Part 2: %" PRId32 "\n", solution_part2_);
+    // printf("Part 2: %" PRIu32 "\n", solution_part2_);
     // check_solution(2, file_name, solution_part2_);
 }
 
