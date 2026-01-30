@@ -142,18 +142,18 @@ void _dfs(Graph *g, bool *visited, size_t n, size_t *i) {
         }
     }
 
-    g->order_map[(*i)++] = n;
+    g->order_map[--(*i)] = n;
 }
 
 void graph_sort_topologically(Graph *g) {
     bool visited[MAX_NODES] = {0};
-    size_t i = 0;
+    size_t i = g->count;
     for (size_t j = 0; j < g->count; ++j) {
         if (!visited[j]) {
             _dfs(g, visited, j, &i);
         }
     }
-    assert(i == g->count);
+    assert(i == 0);
 }
 
 uint64_t graph_count_paths_dp(Graph *g, const char *from, const char *to) {
@@ -166,7 +166,7 @@ uint64_t graph_count_paths_dp(Graph *g, const char *from, const char *to) {
     uint64_t dp[MAX_NODES] = {0};
     dp[from_i] = 1;
 
-    for (int i = g->count - 1; i >= 0; --i) {
+    for (size_t i = 0; i < g->count; ++i) {
         size_t n = g->order_map[i];
         for (Edge *e = g->nodes[n].out; e != NULL; e = e->next) {
             dp[e->to] += dp[n];
