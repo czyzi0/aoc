@@ -13,7 +13,7 @@ typedef struct {
     uint32_t part2;
 } ExpectedSolution;
 
-void check_solution(size_t part, char *file_name, uint32_t solution) {
+void check_solution(size_t part, const char *file_name, uint32_t solution) {
     ExpectedSolution solutions[2] = {
         {"sample1.txt", 7, 33},
         {"input.txt", 417, 0},
@@ -100,9 +100,9 @@ void parse_button(uint32_t *button, const char *text) {
 //     printf("\n");
 // }
 
-#define N 256
+#define BUFF_SIZE 256
 
-void solve(char *file_path) {
+void solve(const char *file_path) {
     char *file_name = strrchr(file_path, '/') + 1;
     printf("### %s ###\n", file_name);
 
@@ -112,7 +112,7 @@ void solve(char *file_path) {
     FILE *fp = fopen(file_path, "r");
     assert(fp);
 
-    char buff[N];
+    char buff[BUFF_SIZE];
 
     uint32_t target;
     size_t size;

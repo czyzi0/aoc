@@ -13,7 +13,7 @@ typedef struct {
     uint64_t part2;
 } ExpectedSolution;
 
-void check_solution(size_t part, char *file_name, uint64_t solution) {
+void check_solution(size_t part, const char *file_name, uint64_t solution) {
     ExpectedSolution solutions[2] = {
         {"sample1.txt", 4277556, 3263827},
         {"input.txt", 5060053676136, 9695042567249},
@@ -32,7 +32,7 @@ void check_solution(size_t part, char *file_name, uint64_t solution) {
 #define MAX_Y 8
 #define MAX_N 1024
 
-void solve(char *file_path) {
+void solve(const char *file_path) {
     char *file_name = strrchr(file_path, '/') + 1;
     printf("### %s ###\n", file_name);
 

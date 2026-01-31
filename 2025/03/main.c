@@ -13,7 +13,7 @@ typedef struct {
     uint64_t part2;
 } ExpectedSolution;
 
-void check_solution(size_t part, char *file_name, uint64_t solution) {
+void check_solution(size_t part, const char *file_name, uint64_t solution) {
     ExpectedSolution solutions[2] = {
         {"sample1.txt", 357, 3121910778619},
         {"input.txt", 17346, 172981362045136},
@@ -29,7 +29,7 @@ void check_solution(size_t part, char *file_name, uint64_t solution) {
 }
 
 
-size_t find_max_digit(char digits[], size_t begin, size_t end) {
+size_t find_max_digit(const char *digits, size_t begin, size_t end) {
     size_t max_i = begin;
     for (size_t i = begin; i < end; ++i) {
         if (digits[i] > digits[max_i]) max_i = i;
@@ -38,7 +38,7 @@ size_t find_max_digit(char digits[], size_t begin, size_t end) {
     return max_i;
 }
 
-uint64_t get_max_number(char digits[], size_t len, size_t n_digits) {
+uint64_t get_max_number(const char *digits, size_t len, size_t n_digits) {
     uint64_t result = 0;
     int32_t i = -1;
     while (n_digits > 0) {
@@ -49,7 +49,9 @@ uint64_t get_max_number(char digits[], size_t len, size_t n_digits) {
     return result;
 }
 
-void solve(char *file_path) {
+#define BUFF_SIZE 128
+
+void solve(const char *file_path) {
     char *file_name = strrchr(file_path, '/') + 1;
     printf("### %s ###\n", file_name);
 
@@ -59,7 +61,7 @@ void solve(char *file_path) {
     FILE *fp = fopen(file_path, "r");
     assert(fp);
 
-    char digits[128];
+    char digits[BUFF_SIZE];
     while (fgets(digits, sizeof(digits), fp) != NULL) {
         size_t len = strlen(digits) - 1;
         digits[len] = '\0';

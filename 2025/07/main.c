@@ -13,7 +13,7 @@ typedef struct {
     int64_t part2;
 } ExpectedSolution;
 
-void check_solution(size_t part, char *file_name, int64_t solution) {
+void check_solution(size_t part, const char *file_name, int64_t solution) {
     ExpectedSolution solutions[2] = {
         {"sample1.txt", 21, 40},
         {"input.txt", 1562, 24292631346665},
@@ -29,7 +29,7 @@ void check_solution(size_t part, char *file_name, int64_t solution) {
 }
 
 
-void solve(char *file_path) {
+void solve(const char *file_path) {
     char *file_name = strrchr(file_path, '/') + 1;
     printf("### %s ###\n", file_name);
 

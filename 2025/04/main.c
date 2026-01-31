@@ -13,7 +13,7 @@ typedef struct {
     uint32_t part2;
 } ExpectedSolution;
 
-void check_solution(size_t part, char *file_name, uint32_t solution) {
+void check_solution(size_t part, const char *file_name, uint32_t solution) {
     ExpectedSolution solutions[2] = {
         {"sample1.txt", 13, 43},
         {"input.txt", 1351, 8345},
@@ -31,7 +31,7 @@ void check_solution(size_t part, char *file_name, uint32_t solution) {
 
 #define IN_RANGE(x, lo, hi) (((x) >= (lo)) && ((x) < (hi)))
 
-uint32_t remove_rolls(char grid[], int32_t size) {
+uint32_t remove_rolls(char *grid, int32_t size) {
     uint32_t n = 0;
     for (int32_t y = 0; y < size; ++y) {
         for (int32_t x = 0; x < size; ++x) {
@@ -57,7 +57,7 @@ uint32_t remove_rolls(char grid[], int32_t size) {
     return n;
 }
 
-void solve(char *file_path) {
+void solve(const char *file_path) {
     char *file_name = strrchr(file_path, '/') + 1;
     printf("### %s ###\n", file_name);
 

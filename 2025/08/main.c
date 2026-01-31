@@ -13,7 +13,7 @@ typedef struct {
     uint64_t part2;
 } ExpectedSolution;
 
-void check_solution(size_t part, char *file_name, uint64_t solution) {
+void check_solution(size_t part, const char *file_name, uint64_t solution) {
     ExpectedSolution solutions[2] = {
         {"sample1.txt", 40, 25272},
         {"input.txt", 47040, 4884971896},
@@ -86,7 +86,9 @@ void circuit_free(Circuit *c) {
     c->capacity = 0;
 }
 
-void solve(char *file_path) {
+#define BUFF_SIZE 256
+
+void solve(const char *file_path) {
     char *file_name = strrchr(file_path, '/') + 1;
     printf("### %s ###\n", file_name);
 
@@ -99,7 +101,7 @@ void solve(char *file_path) {
     FILE *fp = fopen(file_path, "r");
     assert(fp);
 
-    char buff[256];
+    char buff[BUFF_SIZE];
 
     JunctionBox *boxes = malloc(N * sizeof(JunctionBox));
     size_t n_boxes = 0;

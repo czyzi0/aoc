@@ -13,7 +13,7 @@ typedef struct {
     uint64_t part2;
 } ExpectedSolution;
 
-void check_solution(size_t part, char *file_name, uint64_t solution) {
+void check_solution(size_t part, const char *file_name, uint64_t solution) {
     ExpectedSolution solutions[2] = {
         {"sample1.txt", 1227775554, 4174379265},
         {"input.txt", 54234399924, 70187097315},
@@ -28,8 +28,6 @@ void check_solution(size_t part, char *file_name, uint64_t solution) {
     assert(false);
 }
 
-
-#define N 256
 
 size_t count_digits(uint64_t n) {
     uint64_t result = 1;
@@ -66,7 +64,9 @@ bool is_invalid_part2(uint64_t n) {
     return false;
 }
 
-void solve(char *file_path) {
+#define BUFF_SIZE 256
+
+void solve(const char *file_path) {
     char *file_name = strrchr(file_path, '/') + 1;
     printf("### %s ###\n", file_name);
 
@@ -76,14 +76,14 @@ void solve(char *file_path) {
     FILE *fp = fopen(file_path, "r");
     assert(fp);
 
-    char buff[N];
+    char buff[BUFF_SIZE];
 
     int c;
     size_t i = 0;
     while ((c = fgetc(fp)) != EOF) {
         if (c != ',' && c != '\n') {
             buff[i++] = (char)c;
-            assert(i < N);
+            assert(i < BUFF_SIZE);
             continue;
         }
         buff[i] = '\0';

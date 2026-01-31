@@ -13,7 +13,7 @@ typedef struct {
     uint64_t part2;
 } ExpectedSolution;
 
-void check_solution(size_t part, char *file_name, uint64_t solution) {
+void check_solution(size_t part, const char *file_name, uint64_t solution) {
     ExpectedSolution solutions[3] = {
         {"sample1.txt", 5, 0},
         {"sample2.txt", 0, 2},

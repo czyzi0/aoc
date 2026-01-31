@@ -12,7 +12,7 @@ typedef struct {
     int64_t part2;
 } ExpectedSolution;
 
-void check_solution(size_t part, char *file_name, int64_t solution) {
+void check_solution(size_t part, const char *file_name, int64_t solution) {
     ExpectedSolution solutions[2] = {
         {"sample1.txt", 50, 0},
         {"input.txt", 4755429952, 0},
@@ -28,12 +28,12 @@ void check_solution(size_t part, char *file_name, int64_t solution) {
 }
 
 
-#define L 32
+#define BUFF_SIZE 32
 #define N 512
 
 #define ABS(x) ((x) >= 0 ? (x) : -(x))
 
-void solve(char *file_path) {
+void solve(const char *file_path) {
     char *file_name = strrchr(file_path, '/') + 1;
     printf("### %s ###\n", file_name);
 
@@ -43,7 +43,7 @@ void solve(char *file_path) {
     FILE *fp = fopen(file_path, "r");
     assert(fp);
 
-    char buff[L];
+    char buff[BUFF_SIZE];
     int64_t x[N];
     int64_t y[N];
     size_t n = 0;

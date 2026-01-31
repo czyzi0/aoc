@@ -13,7 +13,7 @@ typedef struct {
     uint64_t part2;
 } ExpectedSolution;
 
-void check_solution(size_t part, char *file_name, uint64_t solution) {
+void check_solution(size_t part, const char *file_name, uint64_t solution) {
     ExpectedSolution solutions[2] = {
         {"sample1.txt", 3, 14},
         {"input.txt", 701, 352340558684863},
@@ -38,7 +38,9 @@ typedef struct RangeNode {
     struct RangeNode *next;
 } RangeNode;
 
-void solve(char *file_path) {
+#define BUFF_SIZE 48
+
+void solve(const char *file_path) {
     char *file_name = strrchr(file_path, '/') + 1;
     printf("### %s ###\n", file_name);
 
@@ -48,7 +50,7 @@ void solve(char *file_path) {
     FILE *fp = fopen(file_path, "r");
     assert(fp);
 
-    char buff[48];
+    char buff[BUFF_SIZE];
     RangeNode *head = NULL, *tail = NULL;
 
     // Load all ranges

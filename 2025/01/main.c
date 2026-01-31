@@ -13,7 +13,7 @@ typedef struct {
     int32_t part2;
 } ExpectedSolution;
 
-void check_solution(size_t part, char *file_name, int32_t solution) {
+void check_solution(size_t part, const char *file_name, int32_t solution) {
     ExpectedSolution solutions[2] = {
         {"sample1.txt", 3, 6},
         {"input.txt", 1048, 6498},
@@ -29,9 +29,9 @@ void check_solution(size_t part, char *file_name, int32_t solution) {
 }
 
 
-#define N 8
+#define BUFF_SIZE 8
 
-void solve(char *file_path) {
+void solve(const char *file_path) {
     char *file_name = strrchr(file_path, '/') + 1;
     printf("### %s ###\n", file_name);
 
@@ -41,7 +41,7 @@ void solve(char *file_path) {
     FILE *fp = fopen(file_path, "r");
     assert(fp);
 
-    char buff[N];
+    char buff[BUFF_SIZE];
 
     int32_t dial = 50;
     while (fgets(buff, sizeof(buff), fp) != NULL) {
