@@ -21,14 +21,14 @@ function solve(filePath) {
     const solutionPart1_ = solvePart1(filePath);
     console.log(`Part 1: ${solutionPart1_}`);
     const solutionPart1 = SOLUTIONS_PART1[fileName];
-    assert(solutionPart1_ == solutionPart1);
+    assert(solutionPart1_ === solutionPart1);
   }
 
   if (fileName in SOLUTIONS_PART2) {
     const solutionPart2_ = solvePart2(filePath);
     console.log(`Part 2: ${solutionPart2_}`);
     const solutionPart2 = SOLUTIONS_PART2[fileName];
-    assert(solutionPart2_ == solutionPart2);
+    assert(solutionPart2_ === solutionPart2);
   }
 }
 
