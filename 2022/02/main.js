@@ -34,12 +34,10 @@ function solve(filePath) {
 
 
 function solvePart1(filePath) {
-  const lines = fs.readFileSync(filePath, 'utf8').split(/\n/);
+  const lines = fs.readFileSync(filePath, 'utf8').trim().split(/\n/);
   let solution = 0;
 
   for (let line of lines) {
-    if (!line) continue;
-
     if (line.endsWith("X")) solution += 1;
     else if (line.endsWith("Y")) solution += 2;
     else if (line.endsWith("Z")) solution += 3;
@@ -56,12 +54,10 @@ function solvePart1(filePath) {
 
 
 function solvePart2(filePath) {
-  const lines = fs.readFileSync(filePath, 'utf8').split(/\n/);
+  const lines = fs.readFileSync(filePath, 'utf8').trim().split(/\n/);
   let solution = 0;
 
   for (let line of lines) {
-    if (!line) continue;
-
     if (["A Y", "B X", "C Z"].includes(line)) solution += 1;
     else if (["A Z", "B Y", "C X"].includes(line)) solution += 2;
     else if (["A X", "B Z", "C Y"].includes(line)) solution += 3;
