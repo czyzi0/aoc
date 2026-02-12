@@ -38,14 +38,14 @@ function solvePart1(filePath) {
   let solution = 0;
 
   for (let line of lines) {
-    if (line.endsWith("X")) solution += 1;
-    else if (line.endsWith("Y")) solution += 2;
-    else if (line.endsWith("Z")) solution += 3;
+    if (line.endsWith('X')) solution += 1;
+    else if (line.endsWith('Y')) solution += 2;
+    else if (line.endsWith('Z')) solution += 3;
     else assert(false);
 
-    if (["A Z", "B X", "C Y"].includes(line)) solution += 0;
-    else if (["A X", "B Y", "C Z"].includes(line)) solution += 3;
-    else if (["A Y", "B Z", "C X"].includes(line)) solution += 6;
+    if (['A Z', 'B X', 'C Y'].includes(line)) solution += 0;
+    else if (['A X', 'B Y', 'C Z'].includes(line)) solution += 3;
+    else if (['A Y', 'B Z', 'C X'].includes(line)) solution += 6;
     else assert(false);
   }
 
@@ -58,14 +58,14 @@ function solvePart2(filePath) {
   let solution = 0;
 
   for (let line of lines) {
-    if (["A Y", "B X", "C Z"].includes(line)) solution += 1;
-    else if (["A Z", "B Y", "C X"].includes(line)) solution += 2;
-    else if (["A X", "B Z", "C Y"].includes(line)) solution += 3;
+    if (['A Y', 'B X', 'C Z'].includes(line)) solution += 1;
+    else if (['A Z', 'B Y', 'C X'].includes(line)) solution += 2;
+    else if (['A X', 'B Z', 'C Y'].includes(line)) solution += 3;
     else assert(false);
 
-    if (line.endsWith("X")) solution += 0;
-    else if (line.endsWith("Y")) solution += 3;
-    else if (line.endsWith("Z")) solution += 6;
+    if (line.endsWith('X')) solution += 0;
+    else if (line.endsWith('Y')) solution += 3;
+    else if (line.endsWith('Z')) solution += 6;
     else assert(false);
   }
 
