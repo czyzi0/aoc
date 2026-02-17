@@ -38,10 +38,10 @@ function solvePart1(filePath) {
 
   const solve = (node) => {
     let solution = 0;
-    if (node['items'] !== undefined) {
-      if (node['size'] <= 100000) solution += node['size'];
-      for (const item of Object.values(node['items']))
-        solution += solve(item);
+    if (node.children !== undefined) {
+      if (node.size <= 100000) solution += node.size;
+      for (const child of Object.values(node.children))
+        solution += solve(child);
     }
     return solution
   };
@@ -51,28 +51,23 @@ function solvePart1(filePath) {
 
 function solvePart2(filePath) {
   const root = buildFileTree(filePath);
-  const requiredSpace = 30000000 - (70000000 - root['size']);
+  const requiredSpace = 30000000 - (70000000 - root.size);
 
   const solve = (node) => {
-    if (node['items'] === undefined) return Infinity;
-    const solution = Object.values(node['items'])
+    if (node.children === undefined) return Infinity;
+    const childSizes = Object.values(node.children)
       .map(solve)
-      .reduce(
-        (min, val) => {
-          if (val < min && val >= requiredSpace) return val;
-          return min;
-        },
-        Infinity
-      );
-    if (node['size'] < solution && node['size'] >= requiredSpace) return node['size'];
-    return solution;
+      .filter(size => size >= requiredSpace);
+    const minChildSize = childSizes.length > 0 ? Math.min(...childSizes) : Infinity;
+    if (node.size >= requiredSpace && node.size < minChildSize) return node.size;
+    return minChildSize;
   };
   return solve(root);
 }
 
 
 function buildFileTree(filePath) {
-  const root = {'items': {}};
+  const root = {'children': {}};
 
   let curr = root;
   let match;
@@ -82,26 +77,26 @@ function buildFileTree(filePath) {
         curr = root;
         break;
       case line.match(/\$ cd \.\./) !== null:
-        curr = curr['..'];
+        curr = curr.back;
         break;
       case (match = line.match(/\$ cd (?<name>[\w\.]+)/)) !== null:
-        curr = curr['items'][match.groups.name];
+        curr = curr.children[match.groups.name];
         break;
       case (match = line.match(/dir (?<name>[\w\.]+)/)) !== null:
-        curr['items'][match.groups.name] = {'..': curr, 'items': {}};
+        curr.children[match.groups.name] = {'back': curr, 'children': {}};
         break;
       case (match = line.match(/(?<size>\d+) (?<name>[\w\.]+)/)) !== null:
-        curr['items'][match.groups.name] = {'size': parseInt(match.groups.size)};
+        curr.children[match.groups.name] = {'size': parseInt(match.groups.size)};
         break;
     }
   }
 
   const calculateSizes = node => {
-    if (node['size'] !== undefined) return node['size'];
-    node['size'] = Object.values(node['items'])
+    if (node.size !== undefined) return node.size;
+    node.size = Object.values(node.children)
       .map(calculateSizes)
       .reduce((sum, val) => sum + val, 0);
-    return node['size'];
+    return node.size;
   };
   calculateSizes(root);
 
