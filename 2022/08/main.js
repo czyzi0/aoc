@@ -28,7 +28,7 @@ function solve(filePath) {
     const solutionPart2_ = solvePart2(filePath);
     console.log(`Part 2: ${solutionPart2_}`);
     const solutionPart2 = SOLUTIONS_PART2[fileName];
-    // assert(solutionPart2_ === solutionPart2);
+    assert(solutionPart2_ === solutionPart2);
   }
 }
 
